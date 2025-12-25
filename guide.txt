@@ -1,0 +1,33 @@
+1- create django project
+django-admin startproject projectname
+
+2- create app in project
+python manage.py startapp core
+
+3- register your app setting.py>install app and add core
+
+4- make migrations:
+python manage.py makemigrations
+then run this 
+python manage.py migrate
+
+5- create super user
+python manage.py createsuperuser
+
+6- to connect react to django :
+pip install django-cors-headers 
+then:
+register it in INSTALLED APP in setting .py
+then:
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    ...
+]
+
+
+TO DEPLOY 
+
+settings.py > allowed host["*"]
+then
+pip freeze > requirements.txt
