@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt',
-    "rest_framework",
 
     #my apps 
     'accounts',
