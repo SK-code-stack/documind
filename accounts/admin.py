@@ -4,6 +4,6 @@ from django.contrib.auth import get_user_model
 
 # Register your models here.
 
-User = get_user_model()
+User = get_user_model() # storing model to variable for easy access
 
 admin.site.register(User, UserAdmin)

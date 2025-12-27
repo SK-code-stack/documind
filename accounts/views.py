@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializers
 
-User = get_user_model()
+User = get_user_model() # storing model to variable for easy access
 
 # Create your views here.
 

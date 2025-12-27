@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     #my apps 
     'accounts',
@@ -159,8 +160,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,  # Issue new refresh on each use
+    'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old tokens
 }
+
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'documind-auth'
