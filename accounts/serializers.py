@@ -26,3 +26,12 @@ class UserSerializers(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
         )
         return user
+
+# serializers for OTP verification
+class SendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+    
