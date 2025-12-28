@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response 
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model , authenticate
 from .serializers import UserSerializers
 from django.core.mail import send_mail
 from django.conf import settings
@@ -91,8 +91,37 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# login user -----------------------------------------------------
 
-            
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return Response({'error': 'Email and password required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = authenticate(username=email, password=password)
+
+        if user is None:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "refresh":str(refresh),
+            "access":str(refresh.access_token),
+            "user":{
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            } ,
+        }, status=status.HTTP_200_OK)
+
+
+
 
 
 
