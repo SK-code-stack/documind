@@ -121,6 +121,47 @@ class UserViewSet(viewsets.ModelViewSet):
             } ,
         }, status=status.HTTP_200_OK)
 
+# Update password using old password ------------------------------------------------------------
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def change_password(self, request):
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+        user = request.user
+        # validating all fields 
+        if not current_password or not new_password or not confirm_password:
+            return Response ({"error":"Fill all fields"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # checking new and confirm passwords if they are same
+        if new_password != confirm_password:
+            return Response ({"error":"New password and confirm password are not same"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # checking the current password if exist in the database
+        if not user.check_password(current_password):
+            return Response ({"error":"Current password is in correct"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user.set_password(new_password)
+            user.save()
+            
+            send_mail(
+            f'Welcome to DocuMind {user.first_name}',
+            f'You have successfully update your password',
+            settings.EMAIL_HOST_USER,
+            [user.email],
+            fail_silently=False,
+            )
+            return Response ({"message":f"password successfully updated"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response ({"error":f"failed to update , {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+        
+        
+
+        
+
+
+        
 
 #logout user ----------------------------------------------------------------------------
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
