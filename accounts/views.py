@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import OTP
 from django.http import HttpResponse
+from rest_framework.permissions import IsAuthenticated
 User = get_user_model() # storing model to variable for easy access
 
 # Create your views here.
@@ -121,7 +122,21 @@ class UserViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
+#logout user ----------------------------------------------------------------------------
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def logout(self, request):
+        refresh_token = request.data.get('refresh')
 
+        if not refresh_token:
+            return Response ({'error':'Refresh token required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist
+            return Response ({'message':'logout successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response ({'error':f'{e}, token is not valid'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 
