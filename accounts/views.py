@@ -56,7 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
             'email': email
         }, status=status.HTTP_200_OK)
 
-    # verify the otp and save the user to database-----------------------------------------------------
+# verify the otp and save the user to database-----------------------------------------------------
     @action(detail=False, methods=['post'])
     def confirm_signup(self, request):
         email = request.data.get('email')
@@ -142,7 +142,82 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user.set_password(new_password)
             user.save()
+
+            send_mail(
+            f'Welcome to DocuMind {user.first_name}',
+            f'You have successfully update your password',
+            settings.EMAIL_HOST_USER,
+            [user.email],
+            fail_silently=False,
+            )
+            return Response ({"message":f"password successfully updated"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response ({"error":f"failed to update , {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Update password using email OTP
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def change_password_otp(self, request):
+        user = request.user # current user
+        email = request.user.email # current user's email
+        
+        # delete old otp for this email if exist
+        OTP.objects.filter(email=email).delete()
+        
+        # Generate and send OTP
+        otp_code = OTP.generate_otp(self)
+        OTP.objects.create(email=email, otp=otp_code)
+        
+        try:
+            send_mail(
+                f'Welcome to DocuMind {user.first_name}',
+                f'Your OTP to change your account password is: {otp_code}. Valid for 10 minutes.',
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            return Response({'error': 'Failed to send OTP'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Store user data temporarily (don't create user yet)
+        return Response({
+            'message': 'OTP sent to your email. Please verify to change your password.',
+            'email': email
+        }, status=status.HTTP_200_OK)
+
+# confirm otp to change password
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def confirm_pass_otp(self, request):
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+        otp_code = request.data.get("otp_code")
+
+        user = request.user #current user
+        email = user.email # current user's email
+
+        # checking for blank fields
+        if not new_password or not confirm_password or not otp_code:
+            return Response ({"error":"Fields are not filled"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # checking new and confirm passwords if they are same
+        if new_password != confirm_password:
+            return Response ({"error":"New password and confirm password are not same"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        try: 
+            otp = OTP.objects.get(email=email, otp=otp_code)
             
+            if not otp.is_valid():
+                return Response({'error':'OTP is already used'}, status=status.HTTP_400_BAD_REQUEST)
+        except OTP.DoesNotExist:
+                return Response({'error':'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        otp.is_used = True
+        otp.save()
+
+        #change password
+        try:
+            user.set_password(new_password)
+            user.save()
+
             send_mail(
             f'Welcome to DocuMind {user.first_name}',
             f'You have successfully update your password',
@@ -155,7 +230,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response ({"error":f"failed to update , {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-        
         
 
         
