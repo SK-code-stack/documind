@@ -139,5 +139,15 @@ class UserViewSet(viewsets.ModelViewSet):
         
 
 
+# delete the user account -----------------------------------------------------------------------
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def delete_account(self, request):
+        user = request.user
+        try:
+            user.delete()
+            return Response ({'message':'User delete successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response ({'error':f'{e}, token is not valid'}, status=status.HTTP_400_BAD_REQUEST)
 
 
