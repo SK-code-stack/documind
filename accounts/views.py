@@ -181,7 +181,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         try:
             validate_password_strength(new_password)
-        except serializers.ValidationError:
+        except serializers.ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # saving otp as used 
