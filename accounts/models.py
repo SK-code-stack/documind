@@ -25,5 +25,5 @@ class OTP(models.Model):
                 return not self.is_used and timezone.now() < self.created_at + timedelta(minutes=10)
 
         @staticmethod
-        def generate_otp(self):
+        def generate_otp():
                 return str(random.randint(1000, 9999))
