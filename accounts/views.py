@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,8 +8,9 @@ from .serializers import UserSerializers
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import OTP
-from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
+from .validators import validate_password_strength
+
 User = get_user_model() # storing model to variable for easy access
 
 # Create your views here.
@@ -26,22 +27,30 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def signup(self, request):
         email = request.data.get('email')
-        fname = request.data.get('first_name')
+        f_name = request.data.get('first_name')
+        l_name = request.data.get('last_name')
+        password = request.data.get('password')
+
+        # validate password
+        try:
+            validate_password_strength(password)
+        except serializers.ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check if email already exists
         if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Delete old OTPs
         OTP.objects.filter(email=email).delete()
         
         # Generate and send OTP
-        otp_code = OTP.generate_otp(self)
+        otp_code = OTP.generate_otp()
         OTP.objects.create(email=email, otp=otp_code)
         
         try:
             send_mail(
-                f'Welcome to DocuMind {fname}',
+                f'Welcome to DocuMind {f"{f_name}  {l_name}"}',
                 f'Your OTP is: {otp_code}. Valid for 10 minutes.',
                 settings.EMAIL_HOST_USER,
                 [email],
@@ -247,7 +256,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         try:
             token = RefreshToken(refresh_token)
-            token.blacklist
+            token.blacklist()
             return Response ({'message':'logout successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response ({'error':f'{e}, token is not valid'}, status=status.HTTP_400_BAD_REQUEST)
