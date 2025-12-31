@@ -16,7 +16,7 @@ class Document(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
     title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='document/')
+    file = models.FileField(upload_to='documents/%y/%m/%d')
     file_size = models.IntegerField(help_text='File size in bytes')
     page_count = models.IntegerField(default=0)
     status = models.CharField(max_length=20, choices=status_choice, default='pending')
@@ -45,7 +45,7 @@ class Document(models.Model):
         self.save()
 
 
-    def mark_as_failed(self):
+    def mark_as_failed(self, error):
         self.status = 'failed'
         self.error_message = error
         self.save()
