@@ -16,6 +16,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated]
 
+
+    # list all files of current user 
+    def get_queryset(self):
+        return Document.objects.filter(user=self.request.user).order_by('-uploaded_at')
+
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def upload(self, request):
         file = request.FILES.get('file')
