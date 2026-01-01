@@ -12,6 +12,7 @@ class DocumentChunkSerializer(serializers.ModelSerializer):
         read_only = ['id', 'created_at']
 
 
+# Upload file serializer
 class DocumentSerializer(serializers.ModelSerializer):
 
     chunk_count = serializers.SerializerMethodField()
