@@ -20,9 +20,15 @@ class DocumentViewSet(viewsets.ModelViewSet):
     # list all files of current user 
     def get_queryset(self):
         return Document.objects.filter(user=self.request.user).order_by('-uploaded_at')
+    
+    # user different serializers for differrnt actions
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return DocumentListSerializer
+        return DocumentSerializer
 
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'])
     def upload(self, request):
         file = request.FILES.get('file')
         if not file:
@@ -32,9 +38,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             document = serializer.save()
 
-        return Response({
-            'id': document.id,
-            'title': document.title,
-            'status': document.status,
-            'message': 'Document uploaded successfully'
-        }, status=status.HTTP_201_CREATED)
+            return Response({
+                'id': document.id,
+                'title': document.title,
+                'status': document.status,
+                'message': 'Document uploaded successfully'
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+    
