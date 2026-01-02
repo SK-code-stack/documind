@@ -228,3 +228,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response ({'error':f'{e}, token is not valid'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
+# here we have to create an api ao is user is not login and forget his pass then he can login just by email otp
