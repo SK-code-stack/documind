@@ -17,17 +17,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-    # list all files of current user 
+    # list all files of current user api/document
     def get_queryset(self):
         return Document.objects.filter(user=self.request.user).order_by('-uploaded_at')
     
-    # user different serializers for differrnt actions
+    # user different serializers for differrnt actions 
     def get_serializer_class(self):
         if self.action == 'list':
             return DocumentListSerializer
         return DocumentSerializer
 
-
+    # Upload file to the server
     @action(detail=False, methods=['post'])
     def upload(self, request):
         file = request.FILES.get('file')
@@ -44,5 +44,32 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 'status': document.status,
                 'message': 'Document uploaded successfully'
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    def destroy(self, request, pk=None):
+        document = self.get_object()
+        
+        if document.file:
+            document.file.delete()
+        
+        document.delete()
+
+        return Response({
+            'message': 'Document deleted successfully'
+        }, status=status.HTTP_204_NO_CONTENT)
+    
+    # Get document process status
+    @action(detail=True, methods=['get'])
+    def status(self, request, pk=None):
+        document = self.get_object()
+
+        return Response(
+            {
+            'id': document.id,
+            'status': document.status,
+            'error_message': document.error_message,
+            'page_count': document.page_count,
+            'chunk_count': document.chunks.count(),
+            'is_ready': document.status == 'completed'
+            }
+        )
