@@ -144,7 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # Return success response
         return Response({"message": "Password successfully updated"}, status=status.HTTP_200_OK)
 
-# Update password using email OTP
+# Update password using email OTP if he user is login
     @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
     def change_password_otp(self, request):
         user = request.user # current user
@@ -155,16 +155,37 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': 'Failed to send OTP'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+# Update password using email OTP if he user is not login
+    @action(detail=False, methods=["post"])
+    def change_password_otp_logout(self, request):
+
+        email = request.data.get("email") # current user's email
+        if not email:
+            return Response({'error':'Email required'}, status=status.HTTP_400_BAD_REQUEST)
+        try: 
+            user = User.objects.get(email=email) 
+        except:
+            return Response({'error':'User does not exists'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            return OTPService.generate_send_otp(email, user.first_name, user.last_name)
+        except Exception as e:
+            return Response({'error': 'Failed to send OTP'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 # confirm otp to change password
-    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=["post"])
     def confirm_password_otp(self, request):
+        email = request.data.get('email') # current user's email
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
         otp_code = request.data.get("otp_code")
 
-        user = request.user #current user
-        email = user.email # current user's email
+
+        # check that the user with this email exists or not
+        try:
+            user = User.objects.get(email=email) #current user
+        except:
+            return Response({"error":"Email does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
         # checking for blank fields
         if not new_password or not confirm_password or not otp_code:
@@ -231,4 +252,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-# here we have to create an api ao is user is not login and forget his pass then he can login just by email otp
+
+
+
+
+
+
+
+
+
+# pro salman
+# P2g.....@
+
+    # "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODg5MjIxLCJpYXQiOjE3Njc4MDI4MjEsImp0aSI6IjMyYTQ1NTA4NWUzYTRhYmNhMjJiNDA5NjM1MjEzYmRhIiwidXNlcl9pZCI6IjgifQ.tvSXiRdoea6HXr50lUkG-WxHCspLOUG2YCnijOCJgBk",

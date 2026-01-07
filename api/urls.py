@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import DocumentViewSet
 
 router = DefaultRouter()
-router.register('document', DocumentViewSet)
+router.register('documents', DocumentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

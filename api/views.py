@@ -6,6 +6,10 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
+
+
 # Create your views here.
 
 User = get_user_model()
@@ -28,7 +32,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return DocumentSerializer
 
     # Upload file to the server
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated],  parser_classes=[MultiPartParser, FormParser])
     def upload(self, request):
         file = request.FILES.get('file')
         if not file:
