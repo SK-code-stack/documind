@@ -21,7 +21,7 @@ class Document(models.Model):
     page_count = models.IntegerField(default=0)
     status = models.CharField(max_length=20, choices=status_choice, default='pending')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    process_at = models.DateTimeField(null=True, blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)
 
 

@@ -18,6 +18,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     chunk_count = serializers.SerializerMethodField()
     is_ready = serializers.SerializerMethodField()
     user_email = serializers.CharField(source='user.email', read_only=True)
+    title = serializers.CharField(required=False)
 
     class Meta:
         model = Document
@@ -27,7 +28,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             'chunk_count', 'is_ready', 'user_email'
         ]
         read_only_fields = [
-            'id', 'file_size', 'page_count', 'status', 
+            'id', 'title', 'file_size', 'page_count', 'status', 
             'uploaded_at', 'processed_at', 'error_message',
             'chunk_count', 'is_ready', 'user_email'
         ]
