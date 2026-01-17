@@ -6,8 +6,6 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
-# from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Create your views here.
@@ -50,6 +48,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+    # Delete the selected document
     def destroy(self, request, pk=None):
         document = self.get_object()
         
