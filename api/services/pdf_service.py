@@ -91,3 +91,15 @@ class PDFservice:
                 "pages":pages_data,
                 
             }
+
+
+    @staticmethod
+    def get_page_count(file_path):
+        # Get number of pages in the file
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                return len(pdf.pages)
+        except:
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                return len(pdf_reader.pages)
