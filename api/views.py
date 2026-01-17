@@ -6,6 +6,7 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from .services.pdf_service import PDFservice
 
 
 # Create your views here.
@@ -40,12 +41,34 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             document = serializer.save()
 
-            return Response({
-                'id': document.id,
-                'title': document.title,
-                'status': document.status,
-                'message': 'Document uploaded successfully'
-            }, status=status.HTTP_201_CREATED)
+            # Mark as processing
+            document.mark_as_processing()
+            
+            try:
+                # extract text from pdf
+                pdf_data = PDFservice.extract_text_from_pdf(document.file.path)
+                # Update document
+                document.page_count = pdf_data['page_count']
+                document.mark_as_Completed()
+
+                return Response({
+                    'id': document.id,
+                    'title': document.title,
+                    'status': document.status,
+                    'message': 'Document uploaded successfully'
+                }, status=status.HTTP_201_CREATED)
+            
+            except Exception as e:
+                document.mark_as_failed(str(e))
+
+                return Response({
+                    'id': document.id,
+                    'title': document.title,
+                    'status': 'failed',
+                    'error': str(e),
+                    'message': 'Document uploaded but process failed'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
