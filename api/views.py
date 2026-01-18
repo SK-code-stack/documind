@@ -61,6 +61,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
                     'id': document.id,
                     'title': document.title,
                     'status': document.status,
+                    'chunk_count':chunk_count,
                     'message': 'Document uploaded and processed successfully successfully',
 
                 }, status=status.HTTP_201_CREATED)
