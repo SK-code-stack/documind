@@ -49,13 +49,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 pdf_data = PDFservice.extract_text_from_pdf(document.file.path)
                 # Update document
                 document.page_count = pdf_data['page_count']
-                document.mark_as_Completed()
+                document.mark_as_completed()
 
                 return Response({
                     'id': document.id,
                     'title': document.title,
                     'status': document.status,
-                    'message': 'Document uploaded successfully'
+                    'message': 'Document uploaded and processed successfully successfully',
+
                 }, status=status.HTTP_201_CREATED)
             
             except Exception as e:

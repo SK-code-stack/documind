@@ -264,4 +264,3 @@ class UserViewSet(viewsets.ModelViewSet):
 # pro salman
 # P2g.....@
 
-    # "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3ODg5MjIxLCJpYXQiOjE3Njc4MDI4MjEsImp0aSI6IjMyYTQ1NTA4NWUzYTRhYmNhMjJiNDA5NjM1MjEzYmRhIiwidXNlcl9pZCI6IjgifQ.tvSXiRdoea6HXr50lUkG-WxHCspLOUG2YCnijOCJgBk",
