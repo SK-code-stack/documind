@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from .services.pdf_service import PDFservice
+from .services.chunking_service import ChunkingService
+
 
 
 # Create your views here.
@@ -47,6 +49,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
             try:
                 # extract text from pdf
                 pdf_data = PDFservice.extract_text_from_pdf(document.file.path)
+
+                # Chunk the text
+                chunk_count = ChunkingService.chunk_deocument(document, pdf_data)
+
                 # Update document
                 document.page_count = pdf_data['page_count']
                 document.mark_as_completed()
