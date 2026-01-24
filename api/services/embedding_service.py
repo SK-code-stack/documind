@@ -26,7 +26,7 @@ class EmbeddingService:
     @staticmethod
     def generate_embedding(text):
         """
-        Generate embeddings for single text 
+        Generate embeddings for single text (use when we convert user question to vector)
         Args: 
             text : text to embed
         Return:
@@ -75,10 +75,10 @@ class EmbeddingService:
             raise ValueError("No chunk found for this document")
         
         # Find exact chunk from the document
-        text = [chunk.content for chunk in chunks]
+        texts = [chunk.content for chunk in chunks]
 
         # Generate embeddings in batch 
-        print(f"Generating embeddings for {len(text)} chunks ... ")
+        print(f"Generating embeddings for {len(texts)} chunks ... ")
         embeddings = EmbeddingService.generate_embeddings_batch(texts)
 
         # Update chunks with embeddings
@@ -88,3 +88,39 @@ class EmbeddingService:
         
         print(f"Successfully embedded {len(chunks)} chunks!")
         return len(chunks)
+    
+
+    @staticmethod
+    def get_embedding_dimension():
+        """
+        Get the dimension of embeddings
+        Return:
+            int : Embedding dimension
+        """
+
+        model = EmbeddingService.get_model()
+        return model.get_sentence_embedding_dimension()
+    
+
+    @staticmethod
+    def calculate_similarity(embedding1, embedding2):
+        """
+        Calculate cosin similarity of two embeddings
+        Args:
+            embedding1 : First embedding vector
+            embedding2 : Second embedding vector
+        Return:
+            float : similarity score (0 to 1)
+        """
+
+        # Convert to numpy array
+        vec1 = np.array(embedding1)
+        vec2 = np.array(embedding2)
+
+        # Calculate cosin similarity
+        dot_product = np.dot(vec1, vec2)
+        norm1 = np.linalg.norm(vec1)
+        norm2 = np.linalg.norm(vec2)
+        similarity = dot_product / (norm1 * norm2)
+        
+        return float(similarity)

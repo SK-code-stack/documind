@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from .services.pdf_service import PDFservice
 from .services.chunking_service import ChunkingService
+from .services.embedding_service import EmbeddingService
 
 
 
@@ -48,25 +49,38 @@ class DocumentViewSet(viewsets.ModelViewSet):
             
             try:
                 # extract text from pdf
+                print("Extracting text from pdf ...")
                 pdf_data = PDFservice.extract_text_from_pdf(document.file.path)
 
                 # Chunk the text
+                print("Chunking text ...")
                 chunk_count = ChunkingService.chunk_deocument(document, pdf_data)
+
+                # Generating embeddings
+                print("Generating embeddings ...")
+                embedded_count = EmbeddingService.embed_document_chunks(document)
 
                 # Update document
                 document.page_count = pdf_data['page_count']
                 document.mark_as_completed()
+
+                print("Processing complete!")
 
                 return Response({
                     'id': document.id,
                     'title': document.title,
                     'status': document.status,
                     'chunk_count':chunk_count,
+                    'embedded_chunks': embedded_count,
                     'message': 'Document uploaded and processed successfully successfully',
 
                 }, status=status.HTTP_201_CREATED)
             
             except Exception as e:
+                # Mark as failed if process failed
+                import traceback
+                error_detail = traceback.format_exc()
+                print (f"Error : {error_detail}")
                 document.mark_as_failed(str(e))
 
                 return Response({
@@ -112,3 +126,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
 
 
+
+
+
+# http://127.0.0.1:8000/api/documents/upload/
