@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from .services.pdf_service import PDFservice
 from .services.chunking_service import ChunkingService
 from .services.embedding_service import EmbeddingService
+from .services.vector_db_service import VectorDBService
 
 
 
@@ -60,6 +61,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 print("Generating embeddings ...")
                 embedded_count = EmbeddingService.embed_document_chunks(document)
 
+                # Add to vector database
+                print("Adding to vector database ...")
+                VectorDBService.add_chunks_to_collection(document.id, document.chunks.all())
+
                 # Update document
                 document.page_count = pdf_data['page_count']
                 document.mark_as_completed()
@@ -70,6 +75,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
                     'id': document.id,
                     'title': document.title,
                     'status': document.status,
+                    'page_count': document.page_count,
                     'chunk_count':chunk_count,
                     'embedded_chunks': embedded_count,
                     'message': 'Document uploaded and processed successfully successfully',
