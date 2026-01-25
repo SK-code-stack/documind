@@ -1,5 +1,5 @@
 import chromadb
-from chromadb.config import settings
+from chromadb.config import Settings
 import os
 from django.conf import settings as django_settings
 
@@ -24,14 +24,14 @@ class VectorDBService:
         """
         if cls._client is None:
             # Create directory if it does not exists
-            os.mkdir(cls.CHROMA_DB_PATH, exist_ok=True)
+            os.makedirs(cls.CHROMA_DB_PATH, exist_ok=True)
 
             print(f"Initializing ChromaDB at: {cls.CHROMA_DB_PATH}")
 
             #  Initialize client with persistent storage
             cls._client = chromadb.PersistentClient(
                 path=cls.CHROMA_DB_PATH,
-                settings=settings(
+                settings=Settings(
                     anonymized_telemetry = False,
                     allow_reset = True
                 )
