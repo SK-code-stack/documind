@@ -10,6 +10,7 @@ from .services.pdf_service import PDFservice
 from .services.chunking_service import ChunkingService
 from .services.embedding_service import EmbeddingService
 from .services.vector_db_service import VectorDBService
+from .services.search_service import SearchService
 
 
 
@@ -131,6 +132,38 @@ class DocumentViewSet(viewsets.ModelViewSet):
     
 
 
+    @action(detail=True, methods=['post'])
+    def search(self, request, pk=None):
+        """
+        Search for relevent chunk from the document
+        
+        : Request body:
+        {
+            "query": "What is the user's experience?",
+            "top_k": 5  (optional, default: 5)
+        }
+        """
+
+        document = self.get_object()
+        query = request.data.get('query')
+        top_k = request.data.get('top_k', 5)
+
+        if not query:
+            return Response({'error':'Query is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Search document
+            results = SearchService.search_document(
+                document_id=document.id,
+                query=query,
+                top_k=top_k
+            )
+            return Response(results, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response({'error': f'Search failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
