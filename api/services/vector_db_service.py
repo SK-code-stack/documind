@@ -153,13 +153,20 @@ class VectorDBService:
 
         # Format results
         formatted_result = []
-        for i in range(len(results['id'][0])):
+        for i in range(len(results['ids'][0])):
+
+            # Convert to similarity score (0-1 range)
+            distance = results['distances'][0][i]
+        
+            # Lower distance = higher similarity
+            similarity_score = 1 / (1 + distance)  # ✅ Always between 0 and 1
+
             formatted_result.append({
                 'chunk_id': results['metadatas'][0][i]['chunk_id'],
                 'chunk_index': results['metadatas'][0][i]['chunk_index'],
                 'page_number': results['metadatas'][0][i]['page_number'],
                 'content': results['documents'][0][i],
-                'similarity_score': 1 - results['distances'][0][i], # Convert distance to similarity
+                'similarity_score': similarity_score # Convert distance to similarity
             })
 
         return formatted_result

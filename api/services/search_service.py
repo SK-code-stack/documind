@@ -25,7 +25,7 @@ class SearchService:
         except Document.DoesNotExist:
             raise ValueError(f"Document with id : {document_id} did not found")
 
-        if Document.status != 'completed':
+        if document.status != 'completed':
             raise ValueError(f"Document is not ready : {document.status}")
         
         # 1 convert query to embedding
