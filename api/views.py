@@ -11,6 +11,7 @@ from .services.chunking_service import ChunkingService
 from .services.embedding_service import EmbeddingService
 from .services.vector_db_service import VectorDBService
 from .services.search_service import SearchService
+from .services.geminiService import GeminiService
 
 
 
@@ -151,13 +152,19 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not query:
             return Response({'error':'Query is required'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            # Search document
-            results = SearchService.search_document(
+            # Search document 
+            document_chunks = SearchService.search_document(
                 document_id=document.id,
                 query=query,
                 top_k=top_k
             )
-            return Response(results, status=status.HTTP_200_OK)
+            # Context for ai 
+            context = SearchService.build_context(document_chunks)
+
+            # Responce from ai
+            results = GeminiService.ask_ai(query, context)
+
+            return Response(f"Ai response : {results}", status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

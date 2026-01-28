@@ -159,7 +159,7 @@ class VectorDBService:
             distance = results['distances'][0][i]
         
             # Lower distance = higher similarity
-            similarity_score = 1 / (1 + distance)  # ✅ Always between 0 and 1
+            similarity_score = 1 / (1 + distance)  # Always between 0 and 1
 
             formatted_result.append({
                 'chunk_id': results['metadatas'][0][i]['chunk_id'],
