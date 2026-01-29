@@ -253,14 +253,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
-
-
-
-
-
 # pro salman
 # P2g.....@
 

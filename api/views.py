@@ -267,5 +267,3 @@ class DocumentViewSet(viewsets.ModelViewSet):
             
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-# http://127.0.0.1:8000/api/documents/upload/
