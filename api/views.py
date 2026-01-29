@@ -1,17 +1,23 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from .serializers import DocumentSerializer, DocumentListSerializer
-from .models import Document
 from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+# Models
+from .models import Document
+# Serializers
+from .serializers import (
+    DocumentSerializer, DocumentListSerializer, 
+    ChatRequestSerializer, ChatResponseSerializer, ChatHistorySerializer
+)
+# Services
 from .services.pdf_service import PDFservice
 from .services.chunking_service import ChunkingService
 from .services.embedding_service import EmbeddingService
 from .services.vector_db_service import VectorDBService
 from .services.search_service import SearchService
-from .services.llm_service import GeminiService
+from .services.llm_service import LLMService
 
 
 
@@ -173,6 +179,93 @@ class DocumentViewSet(viewsets.ModelViewSet):
             return Response({'error': f'Search failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
+    @action(detail=True, methods=['post'])
+    def chat(self, request, pk=None):
+        """
+        Ask a question about the document
+        
+        Request body:
+        {
+            "question": "What is the user's experience?",
+            "top_k": 5  (optional)
+        }
+        """
+        from .services.chat_service import ChatService
+        
+        document = self.get_object()
+        
+        # Validate request
+        serializer = ChatRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        question = serializer.validated_data['question']
+        top_k = serializer.validated_data.get('top_k', 5)
+        
+        try:
+            # Ask question
+            result = ChatService.ask_question(
+                document_id=document.id,
+                user=request.user,
+                question=question,
+                top_k=top_k
+            )
+            
+            return Response(result, status=status.HTTP_200_OK)
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response(
+                {'error': f'Chat failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['get'])
+    def chat_history(self, request, pk=None):
+        """Get chat history for document"""
+        from .services.chat_service import ChatService
+        
+        document = self.get_object()
+        
+        try:
+            messages = ChatService.get_chat_history(
+                document_id=document.id,
+                user=request.user
+            )
+            
+            serializer = ChatHistorySerializer(messages, many=True)
+            
+            return Response({
+                'document_id': document.id,
+                'message_count': len(messages),
+                'messages': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['delete'])
+    def clear_history(self, request, pk=None):
+        """Clear chat history for document"""
+        from .services.chat_service import ChatService
+        
+        document = self.get_object()
+        
+        try:
+            count = ChatService.clear_chat_history(
+                document_id=document.id,
+                user=request.user
+            )
+            
+            return Response({
+                'message': f'Cleared {count} messages',
+                'deleted_count': count
+            }, status=status.HTTP_200_OK)
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # http://127.0.0.1:8000/api/documents/upload/
