@@ -11,7 +11,7 @@ from .services.chunking_service import ChunkingService
 from .services.embedding_service import EmbeddingService
 from .services.vector_db_service import VectorDBService
 from .services.search_service import SearchService
-from .services.geminiService import GeminiService
+from .services.llm_service import GeminiService
 
 
 

@@ -1,6 +1,9 @@
 from google import genai
 from django.conf import settings
+from decouple import config
 
+
+# this file needs changes
 
 
         # AI model
