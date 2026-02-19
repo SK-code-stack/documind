@@ -165,12 +165,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 top_k=top_k
             )
             # Context for ai 
-            context = SearchService.build_context(document_chunks)
+            # context = SearchService.build_context(document_chunks)
 
             # Responce from ai
-            results = GeminiService.ask_ai(query, context)
+            # results = LLMService.generate_answer(query, context)
 
-            return Response(f"Ai response : {results}", status=status.HTTP_200_OK)
+            return Response(f"Ai response : {SearchService.build_context(document_chunks)}", status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
